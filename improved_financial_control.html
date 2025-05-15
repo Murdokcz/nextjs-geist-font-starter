@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calculadora de Ganhos - Motorista de Aplicativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .table-auto {
+            table-layout: auto;
+            width: 100%;
+        }
+
+        .table-auto th,
+        .table-auto td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .overflow-x-auto {
+            overflow-x: auto;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .nav-button.active {
+            background-color: #2563eb; /* Tailwind blue-600 */
+            color: white;
+        }
+
+        .fade-enter {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        .fade-enter-active {
+            opacity: 1;
+        }
+
+        .fade-exit {
+            opacity: 1;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .fade-exit-active {
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+        <header class="flex items-center mb-6">
+            <img src="/logo.jpg" alt="MTS Logo" class="h-14 mr-4" />
+            <h1 class="text-2xl font-semibold">Auxiliando Seus Ganhos - Motorista de Aplicativo</h1>
+        </header>
+
+        <!-- Navigation Menu -->
+        <nav class="flex gap-4 mb-6" role="tablist" aria-label="Seções da aplicação">
+            <button type="button" class="nav-button w-full bg-blue-500 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600" data-target="calculadora" role="tab" aria-selected="true" tabindex="0">Calculadora</button>
+            <button type="button" class="nav-button w-full bg-blue-500 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600" data-target="historico" role="tab" aria-selected="false" tabindex="-1">Histórico</button>
+            <button type="button" class="nav-button w-full bg-blue-500 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600" data-target="custoKM" role="tab" aria-selected="false" tabindex="-1">Custo KM</button>
+            <button type="button" class="nav-button w-full bg-blue-500 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600" data-target="estimativas" role="tab" aria-selected="false" tabindex="-1">Estimativas</button>
+        </nav>
+
+        <!-- Sections -->
+        <section id="calculadora" role="tabpanel" tabindex="0">
+            <form id="calculadoraForm" novalidate>
+                <div class="mb-4">
+                    <label for="data" class="block text-gray-700 font-semibold mb-2">Data:</label>
+                    <input type="date" id="data" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="valorGanho" class="block text-gray-700 font-semibold mb-2">Valor ganho no dia (R$):</label>
+                    <input type="number" id="valorGanho" step="0.01" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="horaInicio" class="block text-gray-700 font-semibold mb-2">Horário de início:</label>
+                    <input type="time" id="horaInicio" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="horaFim" class="block text-gray-700 font-semibold mb-2">Horário de fim:</label>
+                    <input type="time" id="horaFim" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="kmRodado" class="block text-gray-700 font-semibold mb-2">KM rodado:</label>
+                    <input type="number" id="kmRodado" step="0.1" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="consumoCarro" class="block text-gray-700 font-semibold mb-2">Quantos KM o carro faz por litro:</label>
+                    <input type="number" id="consumoCarro" step="0.1" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="aluguelCarro" class="block text-gray-700 font-semibold mb-2">Valor do aluguel do veículo por dia (R$):</label>
+                    <input type="number" id="aluguelCarro" step="0.01" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="valorCombustivel" class="block text-gray-700 font-semibold mb-2">Valor do combustível por litro (R$):</label>
+                    <input type="number" id="valorCombustivel" step="0.01" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="flex gap-4 mb-6">
+                    <button type="submit" id="calcularBtn" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600">Calcular</button>
+                    <button type="button" id="salvarBtn" class="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-600" disabled>Salvar</button>
+                </div>
+            </form>
+
+            <div id="resultadoCalculo" class="hidden mt-6 p-4 bg-gray-100 rounded-lg" aria-live="polite">
+                <h2 class="text-xl font-semibold mb-4">Resultado do Cálculo</h2>
+                <p id="resultadoTexto" class="text-gray-700"></p>
+                <p id="estimativaTexto" class="text-gray-700 mt-4"></p>
+            </div>
+        </section>
+
+        <section id="historico" class="hidden" role="tabpanel" tabindex="0" aria-hidden="true">
+            <h2 class="text-xl font-semibold mb-4">Histórico de Ganhos</h2>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2" for="filtroInicio">Filtrar por período:</label>
+                <div class="flex gap-4">
+                    <input type="date" id="filtroInicio" class="px-3 py-2 border rounded" aria-label="Data início do filtro" />
+                    <input type="date" id="filtroFim" class="px-3 py-2 border rounded" aria-label="Data fim do filtro" />
+                    <button id="filtrarBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600">Filtrar</button>
+                    <button id="limparFiltroBtn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600">Limpar</button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white table-auto" aria-describedby="historicoDescricao">
+                    <caption id="historicoDescricao" class="sr-only">Tabela com o histórico de ganhos diários</caption>
+                    <thead>
+                        <tr>
+                            <th class="py-2 px-4 border-b">Data</th>
+                            <th class="py-2 px-4 border-b">Ganho (R$)</th>
+                            <th class="py-2 px-4 border-b">Início</th>
+                            <th class="py-2 px-4 border-b">Fim</th>
+                            <th class="py-2 px-4 border-b">KM Rodado</th>
+                            <th class="py-2 px-4 border-b">KM (R$)</th>
+                            <th class="py-2 px-4 border-b">Hora (R$)</th>
+                            <th class="py-2 px-4 border-b">(KM/L)</th>
+                            <th class="py-2 px-4 border-b">Despesa (R$)</th>
+                            <th class="py-2 px-4 border-b">Combustível (R$)</th>
+                            <th class="py-2 px-4 border-b">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historicoCorpo">
+                        <!-- Histórico será preenchido dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="custoKM" class="hidden" role="tabpanel" tabindex="0" aria-hidden="true">
+            <h2 class="text-xl font-semibold mb-4">Cálculo de Custo por KM</h2>
+            <form id="custoKMForm" novalidate>
+                <div class="mb-4">
+                    <label for="aluguelCarroCusto" class="block text-gray-700 font-semibold mb-2">Valor do aluguel do carro diário (R$):</label>
+                    <input type="number" id="aluguelCarroCusto" step="0.01" min="0" class="w-full px-3 py-2 border rounded" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="prestacaoCarro" class="block text-gray-700 font-semibold mb-2">Valor da prestação do carro diário (R$):</label>
+                    <input type="number" id="prestacaoCarro" step="0.01" min="0" class="w-full px-3 py-2 border rounded" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="despesasMedia" class="block text-gray-700 font-semibold mb-2">Valor das despesas médias do carro diário (R$):</label>
+                    <input type="number" id="despesasMedia" step="0.01" min="0" class="w-full px-3 py-2 border rounded" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="consumoCarroCusto" class="block text-gray-700 font-semibold mb-2">Quantos KM o carro faz por litro:</label>
+                    <input type="number" id="consumoCarroCusto" step="0.1" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="valorCombustivelCusto" class="block text-gray-700 font-semibold mb-2">Valor do combustível por litro (R$):</label>
+                    <input type="number" id="valorCombustivelCusto" step="0.01" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="despesasDiarias" class="block text-gray-700 font-semibold mb-2">Valor das despesas diárias (R$):</label>
+                    <input type="number" id="despesasDiarias" step="0.01" min="0" class="w-full px-3 py-2 border rounded" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="kmRodadoCusto" class="block text-gray-700 font-semibold mb-2">Quantos KM você roda por dia:</label>
+                    <input type="number" id="kmRodadoCusto" step="0.1" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="flex gap-4 mb-6">
+                    <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600">Calcular</button>
+                </div>
+            </form>
+
+            <div id="resultadoCustoKM" class="hidden mt-6 p-4 bg-gray-100 rounded-lg" aria-live="polite">
+                <h2 class="text-xl font-semibold mb-4">Resultado do Cálculo</h2>
+                <p id="custoKMTexto" class="text-gray-700"></p>
+                <p id="despesasDiariasTexto" class="text-gray-700 mt-4"></p>
+                <p id="valorLiquidoTexto" class="text-gray-700 mt-4"></p>
+            </div>
+        </section>
+
+        <section id="estimativas" class="hidden" role="tabpanel" tabindex="0" aria-hidden="true">
+            <h2 class="text-xl font-semibold mb-4">Estimativas de Ganhos</h2>
+            <form id="estimativasForm" novalidate>
+                <div class="mb-4">
+                    <label for="lucroDesejado" class="block text-gray-700 font-semibold mb-2">Valor que deseja ganhar por dia (Lucro Líquido) (R$):</label>
+                    <input type="number" id="lucroDesejado" step="0.01" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
+                        <label for="aluguelDiario" class="block text-gray-700 font-semibold mb-2">Aluguel diário do carro (R$):</label>
+                        <input type="number" id="aluguelDiario" step="0.01" min="0" class="w-full px-3 py-2 border rounded" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="prestacaoDiaria" class="block text-gray-700 font-semibold mb-2">Prestação diária do carro (R$):</label>
+                        <input type="number" id="prestacaoDiaria" step="0.01" min="0" class="w-full px-3 py-2 border rounded" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="despesasMedias" class="block text-gray-700 font-semibold mb-2">Despesas médias do carro (diárias) (R$):</label>
+                        <input type="number" id="despesasMedias" step="0.01" min="0" class="w-full px-3 py-2 border rounded" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="despesasDiariasEstimativas" class="block text-gray-700 font-semibold mb-2">Despesas pessoais diárias (R$):</label>
+                        <input type="number" id="despesasDiariasEstimativas" step="0.01" min="0" class="w-full px-3 py-2 border rounded" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
+                        <label for="consumoCarroEstimativas" class="block text-gray-700 font-semibold mb-2">Consumo do carro (KM por litro):</label>
+                        <input type="number" id="consumoCarroEstimativas" step="0.1" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="valorCombustivelEstimativas" class="block text-gray-700 font-semibold mb-2">Valor do combustível (R$/litro):</label>
+                        <input type="number" id="valorCombustivelEstimativas" step="0.01" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="horasTrabalho" class="block text-gray-700 font-semibold mb-2">Horas de trabalho por dia:</label>
+                        <input type="number" id="horasTrabalho" step="0.5" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="kmDia" class="block text-gray-700 font-semibold mb-2">KM a rodar por dia:</label>
+                        <input type="number" id="kmDia" step="1" min="0" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="diasSemana" class="block text-gray-700 font-semibold mb-2">Dias de trabalho na semana:</label>
+                        <input type="number" id="diasSemana" min="1" max="7" class="w-full px-3 py-2 border rounded" required aria-required="true" />
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600">
+                    Calcular Estimativas
+                </button>
+            </form>
+
+            <div id="resultadoEstimativas" class="hidden mt-6 p-4 bg-gray-100 rounded-lg" aria-live="polite">
+                <h2 class="text-xl font-semibold mb-4">Resultado das Estimativas</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded shadow">
+                        <p class="font-semibold">Valor necessário por KM:</p>
+                        <p id="valorKm" class="text-lg text-blue-600"></p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <p class="font-semibold">Valor necessário por Hora:</p>
+                        <p id="valorHora" class="text-lg text-blue-600"></p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <p class="font-semibold">Total de despesas diárias:</p>
+                        <p id="totalDespesas" class="text-lg text-red-600"></p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <p class="font-semibold">Valor bruto necessário por dia:</p>
+                        <p id="valorBruto" class="text-lg text-green-600"></p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <p class="font-semibold">Lucro líquido diário:</p>
+                        <p id="lucroLiquido" class="text-lg text-green-600"></p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <p class="font-semibold">Lucro total semanal:</p>
+                        <p id="lucroSemanal" class="text-lg text-green-600"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (() => {
+            const sections = ['calculadora', 'historico', 'custoKM', 'estimativas'];
+            const navButtons = document.querySelectorAll('.nav-button');
+            const historico = JSON.parse(localStorage.getItem('historico')) || [];
+
+            // Navigation handling
+            function setActiveSection(targetId) {
+                sections.forEach((sectionId) => {
+                    const section = document.getElementById(sectionId);
+                    const isActive = sectionId === targetId;
+                    section.classList.toggle('hidden', !isActive);
+                    section.setAttribute('aria-hidden', !isActive);
+                    // Update tabindex for accessibility
+                    section.tabIndex = isActive ? 0 : -1;
+                });
+
+                navButtons.forEach((btn) => {
+                    const isActive = btn.dataset.target === targetId;
+                    btn.classList.toggle('active', isActive);
+                    btn.setAttribute('aria-selected', isActive);
+                    btn.tabIndex = isActive ? 0 : -1;
+                });
+            }
+
+            navButtons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    setActiveSection(btn.dataset.target);
+                });
+            });
+
+            // Initialize default section
+            setActiveSection('calculadora');
+
+            // Utility functions
+            function calcularHorasTrabalhadas(horaInicio, horaFim) {
+                const [inicioHoras, inicioMinutos] = horaInicio.split(':').map(Number);
+                const [fimHoras, fimMinutos] = horaFim.split(':').map(Number);
+
+                let diferencaHoras = fimHoras - inicioHoras;
+                let diferencaMinutos = fimMinutos - inicioMinutos;
+
+                if (diferencaMinutos < 0) {
+                    diferencaHoras--;
+                    diferencaMinutos += 60;
+                }
+
+                if (diferencaHoras < 0) {
+                    diferencaHoras += 24;
+                }
+
+                return diferencaHoras + diferencaMinutos / 60;
+            }
+
+            function validarPeriodoTrabalho(horaInicio, horaFim) {
+                const diff = calcularHorasTrabalhadas(horaInicio, horaFim);
+                return diff <= 24;
+            }
+
+            // Calculadora Section
+            const calculadoraForm = document.getElementById('calculadoraForm');
+            const salvarBtn = document.getElementById('salvarBtn');
+            const resultadoCalculo = document.getElementById('resultadoCalculo');
+            const resultadoTexto = document.getElementById('resultadoTexto');
+            const estimativaTexto = document.getElementById('estimativaTexto');
+
+            function validarEntradas() {
+                const valorGanho = parseFloat(document.getElementById('valorGanho').value);
+                const horaInicio = document.getElementById('horaInicio').value;
+                const horaFim = document.getElementById('horaFim').value;
+
+                if (isNaN(valorGanho) || valorGanho <= 0) {
+                    alert('O valor ganho deve ser maior que zero.');
+                    return false;
+                }
+
+                if (!validarPeriodoTrabalho(horaInicio, horaFim)) {
+                    alert('O período de trabalho não pode exceder 24 horas.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            function calcularGanhos() {
+                if (!validarEntradas()) return;
+
+                const valorGanho = parseFloat(document.getElementById('valorGanho').value);
+                const horaInicio = document.getElementById('horaInicio').value;
+                const horaFim = document.getElementById('horaFim').value;
+                const kmRodado = parseFloat(document.getElementById('kmRodado').value);
+                const consumoCarro = parseFloat(document.getElementById('consumoCarro').value);
+                const aluguelCarro = parseFloat(document.getElementById('aluguelCarro').value);
+                const valorCombustivel = parseFloat(document.getElementById('valorCombustivel').value);
+                const data = document.getElementById('data').value;
+
+                const horasTrabalhadas = calcularHorasTrabalhadas(horaInicio, horaFim);
+                const valorPorHora = valorGanho / horasTrabalhadas;
+                const valorPorKm = valorGanho / kmRodado;
+
+                const litrosGastos = kmRodado / consumoCarro;
+                const custoCombustivel = litrosGastos * valorCombustivel;
+                const custoTotal = custoCombustivel + aluguelCarro;
+                const lucroLiquido = valorGanho - custoTotal;
+
+                salvarBtn.disabled = false;
+
+                resultadoTexto.innerHTML = `
+                    <strong>Data:</strong> ${data}<br>
+                    <strong>Valor Ganho:</strong> R$ ${valorGanho.toFixed(2)}<br>
+                    <strong>Horário de Início:</strong> ${horaInicio}<br>
+                    <strong>Horário de Fim:</strong> ${horaFim}<br>
+                    <strong>KM Rodado:</strong> ${kmRodado.toFixed(1)} km<br>
+                    <strong>Valor Ganho por Hora:</strong> R$ ${valorPorHora.toFixed(2)}<br>
+                    <strong>Valor Ganho por KM:</strong> R$ ${valorPorKm.toFixed(2)}<br>
+                    <strong>Consumo do Carro:</strong> ${consumoCarro.toFixed(1)} km/l<br>
+                    <strong>Aluguel do Carro:</strong> R$ ${aluguelCarro.toFixed(2)}<br>
+                    <strong>Valor do Combustível:</strong> R$ ${valorCombustivel.toFixed(2)} por litro<br>
+                    <strong>Custos do Dia:</strong><br>
+                    - Combustível: R$ ${custoCombustivel.toFixed(2)}<br>
+                    - Aluguel: R$ ${aluguelCarro.toFixed(2)}<br>
+                    <strong>Custo Total:</strong> R$ ${custoTotal.toFixed(2)}<br>
+                    <strong>Lucro Líquido:</strong> R$ ${lucroLiquido.toFixed(2)}
+                `;
+
+                const estimativaSemanal = lucroLiquido * 6;
+                estimativaTexto.innerHTML = `
+                    <strong>Estimativa Semanal (Lucro Líquido):</strong> R$ ${estimativaSemanal.toFixed(2)} (trabalhando 6 dias por semana)
+                `;
+
+                resultadoCalculo.classList.remove('hidden');
+            }
+
+            calculadoraForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                calcularGanhos();
+            });
+
+            salvarBtn.addEventListener('click', () => {
+                const data = document.getElementById('data').value;
+                if (!data) {
+                    alert('Por favor, informe a data antes de salvar.');
+                    return;
+                }
+                const valorGanho = parseFloat(document.getElementById('valorGanho').value);
+                const horaInicio = document.getElementById('horaInicio').value;
+                const horaFim = document.getElementById('horaFim').value;
+                const kmRodado = parseFloat(document.getElementById('kmRodado').value);
+                const consumoCarro = parseFloat(document.getElementById('consumoCarro').value);
+                const aluguelCarro = parseFloat(document.getElementById('aluguelCarro').value);
+                const valorCombustivel = parseFloat(document.getElementById('valorCombustivel').value);
+
+                const litrosGastos = kmRodado / consumoCarro;
+                const custoCombustivel = litrosGastos * valorCombustivel;
+                const custoTotal = custoCombustivel + aluguelCarro;
+                const lucroLiquido = valorGanho - custoTotal;
+                const estimativaSemanal = lucroLiquido * 6;
+
+                const novoRegistro = {
+                    data,
+                    valorGanho: valorGanho.toFixed(2),
+                    horaInicio,
+                    horaFim,
+                    kmRodado: kmRodado.toFixed(1),
+                    consumoCarro: consumoCarro.toFixed(1),
+                    aluguelCarro: aluguelCarro.toFixed(2),
+                    valorCombustivel: valorCombustivel.toFixed(2),
+                    custoCombustivel: custoCombustivel.toFixed(2),
+                    custoTotal: custoTotal.toFixed(2),
+                    lucroLiquido: lucroLiquido.toFixed(2),
+                    estimativaSemanal: estimativaSemanal.toFixed(2),
+                    timestamp: new Date(data).getTime()
+                };
+
+                if (historico.some(registro => registro.timestamp === novoRegistro.timestamp)) {
+                    alert('Registro para esta data já existe.');
+                    return;
+                }
+
+                historico.push(novoRegistro);
+                historico.sort((a, b) => b.timestamp - a.timestamp);
+                localStorage.setItem('historico', JSON.stringify(historico));
+
+                limparFormulario();
+                salvarBtn.disabled = true;
+                atualizarHistorico();
+                alert('Registro salvo com sucesso!');
+            });
+
+            function limparFormulario() {
+                calculadoraForm.reset();
+                resultadoCalculo.classList.add('hidden');
+            }
+
+            // Histórico Section
+            const historicoCorpo = document.getElementById('historicoCorpo');
+            const filtrarBtn = document.getElementById('filtrarBtn');
+            const limparFiltroBtn = document.getElementById('limparFiltroBtn');
+
+            function atualizarTabelaHistorico(dados) {
+                historicoCorpo.innerHTML = '';
+
+                dados.forEach((registro, index) => {
+                    const horasTrabalhadas = calcularHorasTrabalhadas(registro.horaInicio, registro.horaFim);
+                    const ganhoPorKm = (parseFloat(registro.valorGanho) / parseFloat(registro.kmRodado)).toFixed(2);
+                    const ganhoPorHora = (parseFloat(registro.valorGanho) / horasTrabalhadas).toFixed(2);
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="py-2 px-4 border-b">${registro.data}</td>
+                        <td class="py-2 px-4 border-b">${registro.valorGanho}</td>
+                        <td class="py-2 px-4 border-b">${registro.horaInicio}</td>
+                        <td class="py-2 px-4 border-b">${registro.horaFim}</td>
+                        <td class="py-2 px-4 border-b">${registro.kmRodado}</td>
+                        <td class="py-2 px-4 border-b">R$ ${ganhoPorKm}</td>
+                        <td class="py-2 px-4 border-b">R$ ${ganhoPorHora}</td>
+                        <td class="py-2 px-4 border-b">${registro.consumoCarro}</td>
+                        <td class="py-2 px-4 border-b">${registro.aluguelCarro}</td>
+                        <td class="py-2 px-4 border-b">${registro.valorCombustivel}</td>
+                        <td class="py-2 px-4 border-b">
+                            <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-600" aria-label="Apagar registro de ${registro.data}" data-index="${index}">Apagar</button>
+                        </td>
+                    `;
+                    historicoCorpo.appendChild(row);
+                });
+            }
+
+            function atualizarHistorico(dadosFiltrados = null) {
+                const dadosParaExibir = dadosFiltrados || historico;
+                atualizarTabelaHistorico(dadosParaExibir);
+
+                const totais = dadosParaExibir.reduce((acc, registro) => {
+                    const horasTrabalhadas = calcularHorasTrabalhadas(registro.horaInicio, registro.horaFim);
+                    return {
+                        valorTotal: acc.valorTotal + parseFloat(registro.valorGanho),
+                        kmTotal: acc.kmTotal + parseFloat(registro.kmRodado),
+                        lucroTotal: acc.lucroTotal + parseFloat(registro.lucroLiquido),
+                        aluguelTotal: acc.aluguelTotal + parseFloat(registro.aluguelCarro),
+                        horasTotal: acc.horasTotal + horasTrabalhadas,
+                        combustivelGastoReais: acc.combustivelGastoReais + parseFloat(registro.custoCombustivel),
+                        combustivelGastoLitros: acc.combustivelGastoLitros + (parseFloat(registro.kmRodado) / parseFloat(registro.consumoCarro)),
+                        dias: acc.dias + 1
+                    };
+                }, { valorTotal: 0, kmTotal: 0, lucroTotal: 0, aluguelTotal: 0, horasTotal: 0, combustivelGastoReais: 0, combustivelGastoLitros: 0, dias: 0 });
+
+                const mediaHTML = `
+                    <div class="mt-4 p-4 bg-gray-100 rounded">
+                        <h3 class="font-semibold mb-2">Estatísticas ${dadosFiltrados ? 'do Período Filtrado' : 'Gerais'}</h3>
+                        <p>Total de Dias: ${totais.dias}</p>
+                        <p>Média Ganho por KM: R$ ${(totais.valorTotal / totais.kmTotal).toFixed(2)}</p>
+                        <p>Média Ganho por Hora: R$ ${(totais.valorTotal / totais.horasTotal).toFixed(2)}</p>
+                        <p>Total Aluguel do Carro: R$ ${totais.aluguelTotal.toFixed(2)}</p>
+                        <p>Total de Horas Trabalhadas: ${totais.horasTotal.toFixed(1)} horas</p>
+                        <p>Total de KM Rodado: ${totais.kmTotal.toFixed(1)} km</p>
+                        <p>Total de Combustível gasto: R$ ${totais.combustivelGastoReais.toFixed(2)} (${totais.combustivelGastoLitros.toFixed(1)} litros)</p>
+                        <p>Lucro: R$ ${totais.lucroTotal.toFixed(2)}</p>
+                    </div>
+                `;
+
+                const estatisticasDiv = document.querySelector('#historico .mt-4');
+                if (estatisticasDiv) {
+                    estatisticasDiv.remove();
+                }
+                document.querySelector('#historico').insertAdjacentHTML('beforeend', mediaHTML);
+            }
+
+            historicoCorpo.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' && e.target.dataset.index !== undefined) {
+                    const index = parseInt(e.target.dataset.index, 10);
+                    if (confirm('Tem certeza que deseja apagar este registro?')) {
+                        historico.splice(index, 1);
+                        localStorage.setItem('historico', JSON.stringify(historico));
+                        atualizarHistorico();
+                    }
+                }
+            });
+
+            filtrarBtn.addEventListener('click', () => {
+                const inicio = new Date(document.getElementById('filtroInicio').value);
+                const fim = new Date(document.getElementById('filtroFim').value);
+
+                if (isNaN(inicio) || isNaN(fim)) {
+                    alert('Por favor, informe datas válidas para o filtro.');
+                    return;
+                }
+
+                if (fim < inicio) {
+                    alert('A data final deve ser maior ou igual à data inicial.');
+                    return;
+                }
+
+                const historicoFiltrado = historico.filter(registro => {
+                    const data = new Date(registro.data);
+                    return data >= inicio && data <= fim;
+                });
+
+                atualizarHistorico(historicoFiltrado);
+            });
+
+            limparFiltroBtn.addEventListener('click', () => {
+                document.getElementById('filtroInicio').value = '';
+                document.getElementById('filtroFim').value = '';
+                atualizarHistorico();
+            });
+
+            // Custo KM Section
+            const custoKMForm = document.getElementById('custoKMForm');
+            const resultadoCustoKM = document.getElementById('resultadoCustoKM');
+            const custoKMTexto = document.getElementById('custoKMTexto');
+            const despesasDiariasTexto = document.getElementById('despesasDiariasTexto');
+            const valorLiquidoTexto = document.getElementById('valorLiquidoTexto');
+
+            custoKMForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const aluguelCarro = parseFloat(document.getElementById('aluguelCarroCusto').value) || 0;
+                const prestacaoCarro = parseFloat(document.getElementById('prestacaoCarro').value) || 0;
+                const despesasMedia = parseFloat(document.getElementById('despesasMedia').value)
